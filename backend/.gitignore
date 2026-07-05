@@ -1,0 +1,13 @@
+node_modules
+
+dist
+
+.env
+
+uploads
+
+logs
+
+coverage
+
+*.log
