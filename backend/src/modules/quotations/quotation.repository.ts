@@ -1,5 +1,6 @@
 import prisma from "../../config/prisma";
 import { CreateQuotationDto } from "./quotation.dto";
+import { QuotationStatus } from "@prisma/client";
 
 class QuotationRepository {
 
@@ -37,7 +38,7 @@ class QuotationRepository {
 
     }
 
-    updateStatus(id:string,status:any){
+    updateStatus(id: string, status: QuotationStatus) {
 
         return prisma.quotation.update({
 

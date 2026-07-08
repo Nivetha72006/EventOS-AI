@@ -2,12 +2,15 @@ import { EventRepository } from "../event/event.repository";
 import vendorRepo from "../vendors/vendor.repository";
 import { RecommendationRepository } from "./recommendation.repository";
 
+type Event = Awaited<ReturnType<EventRepository["findById"]>>;
+type Vendor = Awaited<ReturnType<typeof vendorRepo.findAll>>[number];
+
 const eventRepo = new EventRepository();
 const recommendationRepo = new RecommendationRepository();
 
 export class RecommendationService {
 
-  private scoreVendor(vendor: any, event: any): number {
+  private scoreVendor(vendor: Vendor, event: NonNullable<Event>): number {
 
     let score = 0;
 
@@ -21,8 +24,10 @@ export class RecommendationService {
     // Budget Match
     if (
       event.budget &&
-      vendor.minPrice <= event.budget &&
-      vendor.maxPrice >= event.budget
+      vendor.minimumPrice &&
+      vendor.maximumPrice &&
+      vendor.minimumPrice <= event.budget &&
+      vendor.maximumPrice >= event.budget
     ) {
       score += 30;
     }
@@ -48,32 +53,32 @@ export class RecommendationService {
 
     const vendors = await vendorRepo.findAll();
 
-    // Delete previous recommendations
     await recommendationRepo.deleteByEvent(eventId);
 
-    const ranked = [];
+    const ranked: Array<{
+      vendor: Vendor;
+      score: number;
+      recommendation: Awaited<
+        ReturnType<RecommendationRepository["create"]>
+      >;
+    }> = [];
 
     for (const vendor of vendors) {
 
       const score = this.scoreVendor(vendor, event);
 
       const recommendation = await recommendationRepo.create({
-
-  userId: event.userId,
-
-  eventId,
-
-  recommendedVendorId: vendor.id,
-
-  score,
-
-  reason: "AI recommendation will be generated later."
-
-});
+        userId: event.userId,
+        eventId,
+        recommendedVendorId: vendor.id,
+        score,
+        reason: "AI recommendation will be generated later."
+      });
 
       ranked.push({
-        ...recommendation,
-        vendor
+        vendor,
+        score,
+        recommendation
       });
 
     }

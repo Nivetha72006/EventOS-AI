@@ -1,8 +1,9 @@
 import prisma from "../../config/prisma";
+import { Prisma } from "@prisma/client";
 
 export class RecommendationRepository {
 
-  async create(data: any) {
+  async create(data: Prisma.RecommendationUncheckedCreateInput) {
     return prisma.recommendation.create({
       data,
     });

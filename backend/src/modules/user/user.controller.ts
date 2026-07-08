@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Response, NextFunction } from "express";
 import { AuthRequest } from "../../middleware/auth.middleware";
 import { UserService } from "./user.service";
 
@@ -6,89 +6,105 @@ const service = new UserService();
 
 export class UserController {
 
-  async profile(req: AuthRequest, res: Response) {
-
+  async profile(
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
 
       const user = await service.getUser(req.user!.id);
 
       res.json(user);
 
-    } catch (err: any) {
+    } catch (error) {
 
-      res.status(404).json({
-        message: err.message,
-      });
+      next(error);
 
     }
-
   }
 
-  async getAllUsers(req: AuthRequest, res: Response) {
-
-    const users = await service.getAllUsers();
-
-    res.json(users);
-
-  }
-
-  async getUser(req: AuthRequest, res: Response) {
-
+  async getAllUsers(
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
 
-      const user = await service.getUser(req.params.id);
+      const users = await service.getAllUsers();
+
+      res.json(users);
+
+    } catch (error) {
+
+      next(error);
+
+    }
+  }
+
+  async getUser(
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+
+      const id = req.params.id as string;
+
+      const user = await service.getUser(id);
 
       res.json(user);
 
-    } catch (err: any) {
+    } catch (error) {
 
-      res.status(404).json({
-        message: err.message,
-      });
+      next(error);
 
     }
-
   }
 
-  async update(req: AuthRequest, res: Response) {
-
+  async update(
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
 
+      const id = req.params.id as string;
+
       const user = await service.updateUser(
-        req.params.id,
+        id,
         req.body
       );
 
       res.json(user);
 
-    } catch (err: any) {
+    } catch (error) {
 
-      res.status(400).json({
-        message: err.message,
-      });
+      next(error);
 
     }
-
   }
 
-  async delete(req: AuthRequest, res: Response) {
-
+  async delete(
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
 
-      await service.deleteUser(req.params.id);
+      const id = req.params.id as string;
+
+      await service.deleteUser(id);
 
       res.json({
-        message: "User deleted",
+        message: "User deleted"
       });
 
-    } catch (err: any) {
+    } catch (error) {
 
-      res.status(400).json({
-        message: err.message,
-      });
+      next(error);
 
     }
-
   }
 
 }

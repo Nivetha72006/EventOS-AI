@@ -1,8 +1,9 @@
 import prisma from "../../../config/prisma";
+import { Prisma } from "@prisma/client";
 
 class VendorServiceRepository {
 
-  create(data: any) {
+  create(data: Prisma.VendorServiceCreateInput) {
     return prisma.vendorService.create({
       data,
     });
@@ -16,7 +17,10 @@ class VendorServiceRepository {
     });
   }
 
-  update(id: string, data: any) {
+  update(
+    id: string,
+    data: Prisma.VendorServiceUpdateInput
+  ) {
     return prisma.vendorService.update({
       where: {
         id,

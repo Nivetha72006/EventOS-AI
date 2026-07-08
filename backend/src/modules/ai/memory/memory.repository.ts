@@ -1,41 +1,9 @@
-// import prisma from "../../../config/prisma";
-
-// export class MemoryRepository {
-
-//   async save(data:any){
-
-//     return prisma.memory.create({
-
-//       data
-
-//     });
-
-//   }
-
-//   async getUserMemory(userId:string){
-
-//     return prisma.memory.findMany({
-
-//       where:{
-
-//         userId
-
-//       }
-
-//     });
-
-//   }
-
-// }
-
-
-
-
 import prisma from "../../../config/prisma";
+import { Prisma } from "@prisma/client";
 
 export class MemoryRepository {
 
-  async create(data: any) {
+  async create(data: Prisma.MemoryCreateInput) {
     return prisma.memory.create({
       data,
     });
@@ -49,7 +17,10 @@ export class MemoryRepository {
     });
   }
 
-  async update(eventId: string, context: any) {
+  async update(
+    eventId: string,
+    context: Prisma.InputJsonValue
+  ) {
     return prisma.memory.update({
       where: {
         eventId,

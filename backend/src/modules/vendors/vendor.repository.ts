@@ -1,14 +1,18 @@
 import prisma from "../../config/prisma";
+import { Prisma } from "@prisma/client";
 
 class VendorRepository {
 
-  async create(data: any) {
+  async create(data: Prisma.VendorCreateInput) {
     return prisma.vendor.create({
       data,
     });
   }
 
-  async update(id: string, data: any) {
+  async update(
+    id: string,
+    data: Prisma.VendorUpdateInput
+  ) {
     return prisma.vendor.update({
       where: {
         id,
@@ -44,8 +48,8 @@ class VendorRepository {
   }
 
   async findAll() {
-  return prisma.vendor.findMany();
-}
+    return prisma.vendor.findMany();
+  }
 
 }
 

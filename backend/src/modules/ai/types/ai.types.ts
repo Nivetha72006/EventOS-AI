@@ -9,7 +9,7 @@ export type AgentType =
 export interface AIRequest {
   agent: AgentType;
   prompt: string;
-  context?: any;
+  context?: Record<string, unknown>;
 }
 
 export interface AIResponse {

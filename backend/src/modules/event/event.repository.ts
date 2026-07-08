@@ -1,8 +1,9 @@
 import prisma from "../../config/prisma";
+import { Prisma } from "@prisma/client";
 
 export class EventRepository {
 
-  async create(data: any) {
+  async create(data: Prisma.EventUncheckedCreateInput) {
     return prisma.event.create({
       data,
     });
@@ -21,20 +22,30 @@ export class EventRepository {
 
   async findById(id: string) {
     return prisma.event.findUnique({
-      where: { id },
+      where: {
+        id,
+      },
     });
   }
 
-  async update(id: string, data: any) {
+  async update(
+    id: string,
+    data: Prisma.EventUncheckedUpdateInput
+  ) {
     return prisma.event.update({
-      where: { id },
+      where: {
+        id,
+      },
       data,
     });
   }
 
   async delete(id: string) {
     return prisma.event.delete({
-      where: { id },
+      where: {
+        id,
+      },
     });
   }
+
 }

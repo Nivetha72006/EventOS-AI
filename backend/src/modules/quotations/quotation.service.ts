@@ -1,5 +1,6 @@
 import repository from "./quotation.repository";
 import { CreateQuotationDto } from "./quotation.dto";
+import { QuotationStatus } from "@prisma/client";
 
 class QuotationService{
 
@@ -15,7 +16,7 @@ class QuotationService{
 
     }
 
-    updateStatus(id:string,status:any){
+    updateStatus(id: string, status: QuotationStatus) {
 
         return repository.updateStatus(id,status);
 

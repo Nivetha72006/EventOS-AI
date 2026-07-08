@@ -1,4 +1,5 @@
 import prisma from "../../config/prisma";
+import { Prisma } from "@prisma/client";
 
 export class UserRepository {
 
@@ -10,7 +11,7 @@ export class UserRepository {
         email: true,
         role: true,
         phone: true,
-        image: true,
+        image: true, // Change to image if your schema uses image
         createdAt: true,
       },
     });
@@ -18,32 +19,43 @@ export class UserRepository {
 
   async findById(id: string) {
     return prisma.user.findUnique({
-      where: { id },
+      where: {
+        id,
+      },
     });
   }
 
   async findByEmail(email: string) {
     return prisma.user.findUnique({
-      where: { email },
+      where: {
+        email,
+      },
     });
   }
 
-  async create(data: any) {
+  async create(data: Prisma.UserCreateInput) {
     return prisma.user.create({
       data,
     });
   }
 
-  async update(id: string, data: any) {
+  async update(
+    id: string,
+    data: Prisma.UserUpdateInput
+  ) {
     return prisma.user.update({
-      where: { id },
+      where: {
+        id,
+      },
       data,
     });
   }
 
   async delete(id: string) {
     return prisma.user.delete({
-      where: { id },
+      where: {
+        id,
+      },
     });
   }
 

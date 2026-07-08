@@ -1,25 +1,31 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import service from "./vendor.service";
 
 class VendorController {
 
-  async create(req: Request, res: Response) {
+  async create(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
 
       const vendor = await service.createVendor(req.body);
 
       res.status(201).json(vendor);
 
-    } catch (error: any) {
+    } catch (error) {
 
-      res.status(400).json({
-        message: error.message,
-      });
+      next(error);
 
     }
   }
 
-  async update(req: Request, res: Response) {
+  async update(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
 
       const id = req.params.id as string;
@@ -31,16 +37,18 @@ class VendorController {
 
       res.json(vendor);
 
-    } catch (error: any) {
+    } catch (error) {
 
-      res.status(400).json({
-        message: error.message,
-      });
+      next(error);
 
     }
   }
 
-  async me(req: Request, res: Response) {
+  async me(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
 
       const ownerId = req.params.ownerId as string;
@@ -49,11 +57,9 @@ class VendorController {
 
       res.json(vendor);
 
-    } catch (error: any) {
+    } catch (error) {
 
-      res.status(400).json({
-        message: error.message,
-      });
+      next(error);
 
     }
   }
