@@ -1,11 +1,16 @@
 import repository from "./marketplace.repository";
+import { MarketplaceFilters } from "./marketplace.types";
 
 class MarketplaceService {
 
-  getMarketplace(eventId: string) {
-
-    return repository.getVendorsForEvent(eventId);
-
+  async getMarketplace(
+    eventId: string,
+    filters: MarketplaceFilters = {}
+  ) {
+    return repository.getVendorsForEvent(
+      eventId,
+      filters
+    );
   }
 
 }

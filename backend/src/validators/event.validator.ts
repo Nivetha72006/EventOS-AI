@@ -1,8 +1,7 @@
 import { z } from "zod";
 
 export const createEventSchema = z.object({
-
-  title: z.string().min(3),
+  title: z.string().min(3, "Event name must be at least 3 characters"),
 
   eventType: z.enum([
     "WEDDING",
@@ -12,18 +11,18 @@ export const createEventSchema = z.object({
     "RITUAL",
     "CORPORATE",
     "ENGAGEMENT",
-    "ANNIVERSARY"
+    "ANNIVERSARY",
   ]),
 
   eventDate: z.string().datetime(),
 
-  city: z.string().min(2),
+  city: z.string().min(2, "City is required"),
 
-  state: z.string().min(2),
+  state: z.string().min(2, "State is required"),
 
-  country: z.string().min(2),
+  country: z.string().min(2, "Country is required"),
 
-  guestCount: z.number().int().positive(),
+  guestCount: z.number().int().positive().optional(),
 
   budget: z.number().positive().optional(),
 
@@ -31,6 +30,7 @@ export const createEventSchema = z.object({
 
   theme: z.string().optional(),
 
-  preferredColors: z.any().optional()
+  preferredColors: z.any().optional(),
 
+  requirements: z.array(z.string()).optional(),
 });

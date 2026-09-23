@@ -17,11 +17,11 @@ export class AuthService {
     const hashed = await bcrypt.hash(data.password, 10);
 
     const user = await userRepo.create({
-      name: data.name,
-      email: data.email,
-      password: hashed,
-      role: "USER",
-    });
+  name: data.name,
+  email: data.email,
+  password: hashed,
+  role: data.role,
+});
 
     const token = generateToken(user.id);
 

@@ -5,9 +5,9 @@ const router = Router();
 
 const controller = new RecommendationController();
 
-router.get(
+router.post(
   "/:eventId",
-  (req, res, next) => controller.generate(req, res, next)
+  controller.generate.bind(controller)
 );
 
 export default router;

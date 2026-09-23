@@ -1,42 +1,25 @@
 import prisma from "../../../config/prisma";
-import { Prisma } from "@prisma/client";
+import { CreateMemoryDto } from "./memory.dto";
 
-export class MemoryRepository {
+class MemoryRepository {
 
-  async create(data: Prisma.MemoryCreateInput) {
+  async create(data: CreateMemoryDto) {
     return prisma.memory.create({
       data,
     });
   }
 
-  async get(eventId: string) {
-    return prisma.memory.findUnique({
+  async getEventMemory(eventId: string) {
+    return prisma.memory.findMany({
       where: {
         eventId,
       },
-    });
-  }
-
-  async update(
-    eventId: string,
-    context: Prisma.InputJsonValue
-  ) {
-    return prisma.memory.update({
-      where: {
-        eventId,
-      },
-      data: {
-        context,
-      },
-    });
-  }
-
-  async delete(eventId: string) {
-    return prisma.memory.delete({
-      where: {
-        eventId,
+      orderBy: {
+        createdAt: "asc",
       },
     });
   }
 
 }
+
+export default new MemoryRepository();

@@ -1,23 +1,314 @@
-// -----------------------------
-// Prisma Generator
-// -----------------------------
-
 generator client {
   provider = "prisma-client-js"
 }
-
-// -----------------------------
-// Database
-// -----------------------------
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// =====================================================
-// ENUMS
-// =====================================================
+model User {
+  id               String           @id @default(cuid())
+  name             String
+  email            String           @unique
+  password         String
+  phone            String?
+  avatar           String?
+  role             Role             @default(USER)
+  isVerified       Boolean          @default(false)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  aiChats          AIConversation[]
+  bookings         Booking[]
+  events           Event[]
+  messagesReceived Message[]        @relation("Receiver")
+  messagesSent     Message[]        @relation("Sender")
+  negotiations     Negotiation[]
+  notifications    Notification[]
+  recommendations  Recommendation[]
+  reviews          Review[]
+  vendor           Vendor?
+}
+
+model Vendor {
+  id              String           @id @default(cuid())
+  ownerId         String           @unique
+  businessName    String
+  description     String?
+  experience      Int?
+  rating          Float            @default(0)
+  verified        Boolean          @default(false)
+  status          VendorStatus     @default(PENDING)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  city            String
+  country         String
+  phone           String?
+  state           String
+  website         String?
+  address         String?
+  latitude        Float?
+  longitude       Float?
+  maximumPrice    Float?
+  minimumPrice    Float?
+  availability    Availability[]
+  bookings        Booking[]
+  negotiations    Negotiation[]
+  portfolios      Portfolio[]
+  quotations      Quotation[]
+  recommendations Recommendation[] @relation("VendorRecommendations")
+  owner           User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  services        VendorService[]
+}
+
+model Event {
+  id              String                   @id @default(cuid())
+  title           String
+  description     String?
+  eventType       EventType
+  status          EventStatus              @default(PLANNING)
+  eventDate       DateTime
+  city            String
+  state           String
+  country         String
+  guestCount      Int?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  userId          String
+  budget          Float?
+  preferredColors Json?
+  theme           String?
+  aiChats         AIConversation[]
+  bookings        Booking[]
+  user            User                     @relation(fields: [userId], references: [id])
+  requirements    EventVendorRequirement[]
+  invitations     Invitation[]
+  memory          Memory?
+  messages        Message[]
+  planner         Planner?
+  recommendations Recommendation[]
+}
+
+model EventVendorRequirement {
+  id       String         @id @default(cuid())
+  eventId  String
+  category VendorCategory
+  event    Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, category])
+}
+
+model VendorService {
+  id              String         @id @default(cuid())
+  vendorId        String
+  description     String?
+  category        VendorCategory
+  title           String
+  basePrice       Float
+  maxGuests       Int?
+  minGuests       Int?
+  supportedEvents EventType[]
+  Booking         Booking[]
+  vendor          Vendor         @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+}
+
+model Booking {
+  id         String         @id @default(cuid())
+  eventId    String
+  vendorId   String
+  userId     String
+  createdAt  DateTime       @default(now())
+  serviceId  String?
+  notes      String?
+  status     BookingStatus  @default(PENDING)
+  event      Event          @relation(fields: [eventId], references: [id])
+  service    VendorService? @relation(fields: [serviceId], references: [id])
+  user       User           @relation(fields: [userId], references: [id])
+  vendor     Vendor         @relation(fields: [vendorId], references: [id])
+  quotations Quotation[]
+  review     Review?
+}
+
+model Quotation {
+  id          String          @id @default(cuid())
+  bookingId   String
+  createdAt   DateTime        @default(now())
+  amount      Float
+  message     String?
+  status      QuotationStatus @default(PENDING)
+  updatedAt   DateTime        @updatedAt
+  validTill   DateTime?
+  vendorId    String
+  negotiation Negotiation?
+  booking     Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  vendor      Vendor          @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+}
+
+model Portfolio {
+  id          String   @id @default(cuid())
+  vendorId    String
+  title       String
+  description String?
+  imageUrl    String
+  createdAt   DateTime @default(now())
+  vendor      Vendor   @relation(fields: [vendorId], references: [id])
+}
+
+model Availability {
+  id            String   @id @default(cuid())
+  vendorId      String
+  availableDate DateTime
+  isBooked      Boolean  @default(false)
+  vendor        Vendor   @relation(fields: [vendorId], references: [id])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  bookingId String   @unique
+  userId    String
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Invitation {
+  id        String   @id @default(cuid())
+  eventId   String
+  title     String
+  theme     String
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  type      NotificationType
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AIConversation {
+  id        String   @id @default(cuid())
+  userId    String
+  eventId   String?
+  createdAt DateTime @default(now())
+  event     Event?   @relation(fields: [eventId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Message {
+  id         String      @id @default(cuid())
+  senderId   String
+  receiverId String
+  content    String
+  createdAt  DateTime    @default(now())
+  eventId    String?
+  isRead     Boolean     @default(false)
+  fileUrl    String?
+  type       MessageType @default(TEXT)
+  event      Event?      @relation(fields: [eventId], references: [id])
+  receiver   User        @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  sender     User        @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
+}
+
+model Memory {
+  id        String     @id @default(cuid())
+  eventId   String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  context   Json
+  type      MemoryType
+  event     Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
+
+model Negotiation {
+  id                String            @id @default(cuid())
+  vendorId          String
+  userId            String
+  status            NegotiationStatus @default(STARTED)
+  createdAt         DateTime          @default(now())
+  aiSuggestedAmount Float
+  conversation      Json
+  finalAmount       Float?
+  quotationId       String            @unique
+  updatedAt         DateTime          @updatedAt
+  vendorAmount      Float?
+  quotation         Quotation         @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  user              User              @relation(fields: [userId], references: [id])
+  vendor            Vendor            @relation(fields: [vendorId], references: [id])
+}
+
+model Recommendation {
+  id                  String   @id @default(cuid())
+  userId              String
+  eventId             String
+  recommendedVendorId String
+  score               Float
+  reason              String
+  createdAt           DateTime @default(now())
+  aiScore             Float?
+  confidence          Float?
+  matchReasons        Json?
+  event               Event    @relation(fields: [eventId], references: [id])
+  vendor              Vendor   @relation("VendorRecommendations", fields: [recommendedVendorId], references: [id])
+  user                User     @relation(fields: [userId], references: [id])
+
+  @@unique([eventId, recommendedVendorId])
+}
+
+model EmergencyVendorLog {
+  id          String   @id @default(cuid())
+  eventId     String
+  oldVendorId String
+  newVendorId String
+  reason      String
+  createdAt   DateTime @default(now())
+}
+
+model Planner {
+  id                 String              @id @default(cuid())
+  eventId            String              @unique
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  event              Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tasks              PlannerTask[]
+  reminders          Reminder[]
+  vendorInstructions VendorInstruction[]
+}
+
+model PlannerTask {
+  id          String    @id @default(cuid())
+  plannerId   String
+  title       String
+  description String?
+  dueDate     DateTime?
+  completed   Boolean   @default(false)
+  planner     Planner   @relation(fields: [plannerId], references: [id], onDelete: Cascade)
+}
+
+model Reminder {
+  id           String   @id @default(cuid())
+  plannerId    String
+  title        String
+  reminderTime DateTime
+  sent         Boolean  @default(false)
+  planner      Planner  @relation(fields: [plannerId], references: [id], onDelete: Cascade)
+}
+
+model VendorInstruction {
+  id             String         @id @default(cuid())
+  plannerId      String
+  vendorCategory VendorCategory
+  instruction    String
+  planner        Planner        @relation(fields: [plannerId], references: [id], onDelete: Cascade)
+}
 
 enum Role {
   USER
@@ -90,411 +381,28 @@ enum QuotationStatus {
   EXPIRED
 }
 
-// =====================================================
-// USER
-// =====================================================
-
-model User {
-  id       String  @id @default(cuid())
-  name     String
-  email    String  @unique
-  password String
-  phone    String?
-  avatar   String?
-
-  role Role @default(USER)
-
-  isVerified Boolean @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-
-  vendor           Vendor?
-  events           Event[]
-  bookings         Booking[]
-  reviews          Review[]
-  notifications    Notification[]
-  aiChats          AIConversation[]
-  memories         Memory[]
-  negotiations     Negotiation[]
-  recommendations  Recommendation[]
-  messagesSent     Message[]        @relation("Sender")
-  messagesReceived Message[]        @relation("Receiver")
+enum NotificationType {
+  BOOKING
+  QUOTATION
+  NEGOTIATION
+  PLANNER
+  REMINDER
+  SAMPLE
+  GENERAL
 }
 
-// =====================================================
-// VENDOR
-// =====================================================
-
-model Vendor {
-  id String @id @default(cuid())
-
-  ownerId String @unique
-
-  businessName String
-  description  String?
-
-  experience Int?
-
-  rating Float @default(0)
-
-  verified Boolean @default(false)
-
-  status VendorStatus @default(PENDING)
-
-  // Address
-  address String?
-
-  city    String
-  state   String
-  country String
-
-  latitude  Float?
-  longitude Float?
-
-  minimumPrice Float?
-  maximumPrice Float?
-
-  phone   String?
-  website String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-
-  services     VendorService[]
-  portfolios   Portfolio[]
-  availability Availability[]
-
-  bookings        Booking[]
-  negotiations    Negotiation[]
-  quotations      Quotation[]
-  recommendations Recommendation[] @relation("VendorRecommendations")
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  AUDIO
+  AI
 }
 
-model Event {
-  id String @id @default(cuid())
-
-  title String
-
-  eventType EventType
-
-  eventDate DateTime
-
-  city    String
-  state   String
-  country String
-
-  guestCount Int
-
-  budget Float?
-
-  description String?
-
-  theme String?
-
-  preferredColors Json?
-
-  status EventStatus @default(PLANNING)
-
-  userId String
-
-  user User @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  bookings Booking[]
-
-  invitations Invitation[]
-
-  memories Memory[]
-
-  aiChats AIConversation[]
-
-  recommendations Recommendation[]
-}
-
-model VendorService {
-  id String @id @default(cuid())
-
-  vendorId String
-
-  category VendorCategory
-
-  title String
-
-  description String?
-
-  basePrice Float
-
-  minGuests Int?
-
-  maxGuests Int?
-
-  supportedEvents EventType[]
-
-  vendor  Vendor    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-  Booking Booking[]
-}
-
-model Booking {
-  id String @id @default(cuid())
-
-  eventId String
-
-  vendorId String
-
-  serviceId String?
-
-  userId String
-
-  notes String?
-
-  status BookingStatus @default(PENDING)
-
-  createdAt DateTime @default(now())
-
-  event Event @relation(fields: [eventId], references: [id])
-
-  vendor Vendor @relation(fields: [vendorId], references: [id])
-
-  user User @relation(fields: [userId], references: [id])
-
-  service VendorService? @relation(fields: [serviceId], references: [id])
-
-  quotations Quotation[]
-
-  review Review?
-}
-
-model Quotation {
-  id String @id @default(cuid())
-
-  bookingId String
-
-  vendorId String
-
-  amount Float
-
-  message String?
-
-  validTill DateTime?
-
-  status QuotationStatus @default(PENDING)
-
-  createdAt DateTime @default(now())
-
-  updatedAt DateTime @updatedAt
-
-  negotiation Negotiation?
-
-  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-
-  vendor Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-}
-
-model Portfolio {
-  id String @id @default(cuid())
-
-  vendorId String
-
-  vendor Vendor @relation(fields: [vendorId], references: [id])
-
-  title String
-
-  description String?
-
-  imageUrl String
-
-  createdAt DateTime @default(now())
-}
-
-model Availability {
-  id String @id @default(cuid())
-
-  vendorId String
-
-  vendor Vendor @relation(fields: [vendorId], references: [id])
-
-  availableDate DateTime
-
-  isBooked Boolean @default(false)
-}
-
-model Review {
-  id String @id @default(cuid())
-
-  bookingId String @unique
-
-  booking Booking @relation(fields: [bookingId], references: [id])
-
-  userId String
-
-  user User @relation(fields: [userId], references: [id])
-
-  rating Int
-
-  comment String?
-
-  createdAt DateTime @default(now())
-}
-
-model Invitation {
-  id String @id @default(cuid())
-
-  eventId String
-
-  event Event @relation(fields: [eventId], references: [id])
-
-  title String
-
-  theme String
-
-  imageUrl String?
-
-  createdAt DateTime @default(now())
-}
-
-model Notification {
-  id String @id @default(cuid())
-
-  userId String
-
-  user User @relation(fields: [userId], references: [id])
-
-  title String
-
-  message String
-
-  isRead Boolean @default(false)
-
-  createdAt DateTime @default(now())
-}
-
-model AIConversation {
-  id String @id @default(cuid())
-
-  userId String
-
-  eventId String?
-
-  user User @relation(fields: [userId], references: [id])
-
-  event Event? @relation(fields: [eventId], references: [id])
-
-  messages Message[]
-
-  createdAt DateTime @default(now())
-}
-
-model Message {
-  id String @id @default(cuid())
-
-  conversationId String
-
-  conversation AIConversation @relation(fields: [conversationId], references: [id])
-
-  senderId String
-
-  receiverId String?
-
-  sender User @relation("Sender", fields: [senderId], references: [id])
-
-  receiver User? @relation("Receiver", fields: [receiverId], references: [id])
-
-  content String
-
-  isAI Boolean @default(false)
-
-  createdAt DateTime @default(now())
-}
-
-model Memory {
-  id String @id @default(cuid())
-
-  userId String
-
-  eventId String @unique
-
-  context Json
-
-  createdAt DateTime @default(now())
-
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-}
-
-model Negotiation {
-  id String @id @default(cuid())
-
-  quotationId String @unique
-
-  userId String
-
-  vendorId String
-
-  aiSuggestedAmount Float
-
-  vendorAmount Float?
-
-  finalAmount Float?
-
-  status NegotiationStatus @default(STARTED)
-
-  conversation Json
-
-  createdAt DateTime @default(now())
-
-  updatedAt DateTime @updatedAt
-
-  quotation Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
-
-  user User @relation(fields: [userId], references: [id])
-
-  vendor Vendor @relation(fields: [vendorId], references: [id])
-}
-
-model Recommendation {
-  id String @id @default(cuid())
-
-  userId String
-
-  user User @relation(fields: [userId], references: [id])
-
-  eventId String
-
-  event Event @relation(fields: [eventId], references: [id])
-
-  recommendedVendorId String
-
-  vendor Vendor @relation("VendorRecommendations", fields: [recommendedVendorId], references: [id])
-
-  score Float
-
-  reason String
-
-  createdAt DateTime @default(now())
-
-  @@unique([eventId, recommendedVendorId])
-}
-
-model EmergencyVendorLog {
-  id String @id @default(cuid())
-
-  eventId String
-
-  oldVendorId String
-
-  newVendorId String
-
-  reason String
-
-  createdAt DateTime @default(now())
+enum MemoryType {
+  EVENT
+  PLANNER
+  NEGOTIATION
+  DESIGN
+  CHAT
 }

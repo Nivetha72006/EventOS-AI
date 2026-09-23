@@ -48,8 +48,14 @@ class VendorRepository {
   }
 
   async findAll() {
-    return prisma.vendor.findMany();
-  }
+  return prisma.vendor.findMany({
+    include: {
+      services: true,
+      portfolios: true,
+      availability: true,
+    },
+  });
+}
 
 }
 

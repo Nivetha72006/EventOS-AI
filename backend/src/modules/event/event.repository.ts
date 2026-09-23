@@ -3,11 +3,49 @@ import { Prisma } from "@prisma/client";
 
 export class EventRepository {
 
-  async create(data: Prisma.EventUncheckedCreateInput) {
-    return prisma.event.create({
-      data,
-    });
-  }
+  async create(data: Prisma.EventCreateInput) {
+
+  return prisma.event.create({
+
+    data: {
+
+      title: data.title,
+
+      eventType: data.eventType,
+
+      eventDate: data.eventDate,
+
+      city: data.city,
+
+      state: data.state,
+
+      country: data.country,
+
+      guestCount: data.guestCount,
+
+      budget: data.budget,
+
+      description: data.description,
+
+      theme: data.theme,
+
+      preferredColors: data.preferredColors,
+
+      user: data.user,
+
+      requirements: data.requirements
+
+    },
+
+    include: {
+
+      requirements: true
+
+    }
+
+  });
+
+}
 
   async findAll(userId: string) {
     return prisma.event.findMany({
@@ -15,10 +53,11 @@ export class EventRepository {
         userId,
       },
       orderBy: {
-        eventDate: "asc",
+        createdAt: "desc",
       },
     });
   }
+
 
   async findById(id: string) {
     return prisma.event.findUnique({

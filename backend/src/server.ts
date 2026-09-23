@@ -1,6 +1,19 @@
-import app from "./app";
-import { env } from "./config/env";
+import http from "http";
 
-app.listen(env.PORT, () => {
-  console.log(`🚀 Server running on port ${env.PORT}`);
+import app from "./app";
+
+import { initializeSocket } from "./sockets/socket";
+
+import { registerSocketHandlers } from "./sockets/socket.handler";
+
+const server = http.createServer(app);
+
+const io = initializeSocket(server);
+
+registerSocketHandlers(io);
+
+server.listen(process.env.PORT || 5000, () => {
+
+    console.log("Server running");
+
 });

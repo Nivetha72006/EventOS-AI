@@ -17,17 +17,14 @@ export interface VendorAI {
 }
 
 export interface EventAI {
-
+  id: string;
   title: string;
-
   eventType: string;
-
   city: string;
-
-  budget: number;
-
+  state: string;
+  country: string;
   guestCount: number;
-
+  budget?: number | null;
 }
 
 export interface RecommendationRequest {

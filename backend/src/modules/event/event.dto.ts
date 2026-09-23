@@ -1,3 +1,5 @@
+import { VendorCategory } from "@prisma/client";
+
 export interface CreateEventDTO {
   title: string;
   eventType: string;
@@ -11,4 +13,6 @@ export interface CreateEventDTO {
 
   budget?: number;
   description?: string;
+
+  requirements?: VendorCategory[];
 }
